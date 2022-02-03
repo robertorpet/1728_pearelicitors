@@ -1,0 +1,547 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+Orpet, RJ, WR Cooper, EH Beers, and LB Nottingham. 2021. Test of plant defense elicitors for arthropod pest suppression and PR-1 gene induction in pear orchards. Entomologia Experimentalis et Applicata 169:1137-1146.
+
+Data collection: Nottingham & Cooper
+Code: Orpet
+
+Figures for 2017 Experiment Data (Figs. 1 and 2)
+```{r}
+#LOAD DATA
+library(readxl)
+library(ggpubr)
+Data <- read_excel("1728 analysis - leaf brush.xlsx")
+
+
+#REORDER TREATMENT LABELS
+Data$trt <- factor(Data$trt, levels=c("Control", "Actigard", "Employ"), labels=c("Control", "ASM", "Harpin"))
+Data$site <- factor(Data$site,
+                    levels=c("A","B","C","D","E","F"),
+                    labels=c("Orchard 1", "Orchard 2", "Orchard 3","Orchard 4", "Orchard 5", "Orchard 6"))
+
+
+library(ggplot2)
+
+#Pear psylla eggs panel
+eggs <- ggplot(data = Data, aes(x = day, y = eggs/50, shape = trt, linetype = trt, color = trt, fill = trt)) +
+  stat_summary(fun.data = mean_se, geom="errorbar", width=0,  size=0.4, position=position_dodge(3), linetype = 'solid') +
+  stat_summary(fun = mean, geom = "line", position=position_dodge(3)) +
+  stat_summary(fun = mean, geom = "point", position=position_dodge(3)) +
+  scale_color_manual(values=c('black', 'black', 'grey')) +
+  scale_shape_manual(values=c(21, 23, 23)) +
+  scale_linetype_manual(values = c('dotted', 'solid', 'solid')) +
+  scale_fill_manual(values=c('white', 'black', 'grey')) +
+  scale_x_continuous(limits = c(207,245), breaks = c(212, 227, 243), labels = c('31 Jul', '15 Aug', '31 Aug')) +
+  #scale_y_continuous(expand = expansion(mult = c(0.05, 0))) +
+  facet_wrap(~site, scales = "free_y") +
+  ylab("No. eggs/leaf\n") +
+  xlab("\nDate") +
+  #ggtitle("A") +
+  guides(fill=guide_legend(ncol=1)) +
+  theme_classic() +
+  annotate("segment", x=-Inf, xend=Inf, y=-Inf, yend=-Inf, size = 0.75) +
+  annotate("segment", x=-Inf, xend=-Inf, y=-Inf, yend=Inf, size = 0.75) +
+  theme(
+        strip.text = element_text(vjust = -1, size = 8),
+        plot.title = element_text(size = 11, face = "bold"),
+        strip.background = element_blank(),
+        #panel.border = element_rect(fill = NA, colour = "black", size = 0.75),
+        axis.line = element_line(colour = 'black', size = 0),
+        axis.title.x = element_blank(),
+        axis.ticks = element_line(colour = "black"),
+        axis.text.x = element_text(color = 'black'),
+        axis.text.y = element_text(color = 'black'),
+        plot.margin = (unit(c(1,1,0,1),"mm")),
+                #transparent background
+                panel.grid.major = element_blank(), 
+                panel.grid.minor = element_blank(),
+                panel.background = element_rect(fill = "transparent",colour = NA),
+                plot.background = element_rect(fill = "transparent",colour = NA),
+                legend.position=c(1,1), legend.justification=c(1,0),legend.box="vertical", legend.margin=margin(), legend.title = element_blank(), legend.key.size = unit(0.75, 'lines')
+        )
+  
+#Pear psylla nymphs panel
+nymphs <- ggplot(data = Data, aes(x = day, y = (old+yng)/50, shape = trt, linetype = trt, fill = trt, color = trt)) +
+  stat_summary(fun.data = mean_se, geom="errorbar", width=0,  size=0.4, position=position_dodge(3), linetype = 'solid') +
+  stat_summary(fun = mean, geom = "line", position=position_dodge(3)) +
+  stat_summary(fun = mean, geom = "point", position=position_dodge(3)) +
+  scale_color_manual(values=c('black', 'black', 'grey')) +
+  scale_shape_manual(values=c(21, 23, 23)) +
+  scale_linetype_manual(values = c('dotted', 'solid', 'solid')) +
+  scale_fill_manual(values=c('white', 'black', 'grey')) +
+  scale_x_continuous(limits = c(207,245), breaks = c(212, 227, 243), labels = c('31 Jul', '15 Aug', '31 Aug')) +
+  #scale_y_continuous(expand = expansion(mult = c(0.05, 0))) +
+  facet_wrap(~site, scales = "free_y") +
+  ylab("No. nymphs/leaf\n") +
+  xlab("\nDate") +
+  #ggtitle("B") +
+  guides(fill=guide_legend(ncol=1)) +
+  theme_classic() +
+  annotate("segment", x=-Inf, xend=Inf, y=-Inf, yend=-Inf, size = 0.75) +
+  annotate("segment", x=-Inf, xend=-Inf, y=-Inf, yend=Inf, size = 0.75) +
+  theme(
+        strip.text = element_text(vjust = -1, size = 8),
+        plot.title = element_text(size = 11, face = "bold"),
+        strip.background = element_blank(),
+        #panel.border = element_rect(fill = NA, colour = "black", size = 0.75),
+        axis.line = element_line(colour = 'black', size = 0),
+        #axis.title.x = element_blank(),
+        axis.ticks = element_line(colour = "black"),
+        axis.text.x = element_text(color = 'black'),
+        axis.text.y = element_text(color = 'black'),
+        plot.margin = (unit(c(0,0,0,0),"mm")),
+                #transparent background
+                panel.grid.major = element_blank(), 
+                panel.grid.minor = element_blank(),
+                panel.background = element_rect(fill = "transparent",colour = NA),
+                plot.background = element_rect(fill = "transparent",colour = NA),
+                legend.position=c(1,1), legend.justification=c(1,0),legend.box="vertical", legend.margin=margin(), legend.title = element_blank(), legend.key.size = unit(0.75, 'lines')
+        )
+  
+
+
+output <- ggarrange(
+    eggs,
+    nymphs,
+    ncol = 1,
+    align="hv", common.legend = TRUE)
+  #ggsave(plot = output, file = paste("file",Site,".png",sep=""), width = 8.5, height = 10, path = "outputgraphs")
+
+ggsave(plot = output, file = "Figure_1.tiff", width = 16, height = 14, units = "cm", dpi = 400)
+
+
+#Spider mites panel
+Data <- read_excel("1728 analysis - leaf brush.xlsx")
+Data$trt <- factor(Data$trt, levels=c("Control", "Actigard", "Employ"), labels=c("Control", "ASM", "Harpin"))
+  #Exclude sites A and B due to very low counts
+  Data <- subset(Data, site != "A")
+  Data <- subset(Data, site != "B")
+  Data$site <- factor(Data$site,
+                    levels=c("C","D","E","F"),
+                    labels=c("Orchard 3","Orchard 4", "Orchard 5", "Orchard 6"))
+
+output <- ggplot(data = Data, aes(x = day, y = tsm/50, shape = trt, linetype = trt, color = trt, fill = trt)) +
+  stat_summary(fun.data = mean_se, geom="errorbar", width=0,  size=0.4, position=position_dodge(3), linetype = 'solid') +
+  stat_summary(fun = mean, geom = "line", position=position_dodge(3)) +
+  stat_summary(fun = mean, geom = "point", position=position_dodge(3)) +
+  scale_color_manual(values=c('black', 'black', 'grey')) +
+  scale_shape_manual(values=c(21, 23, 23)) +
+  scale_linetype_manual(values = c('dotted', 'solid', 'solid')) +
+  scale_fill_manual(values=c('white', 'black', 'grey')) +
+  scale_x_continuous(limits = c(207,245), breaks = c(212, 227, 243), labels = c('31 Jul', '15 Aug', '31 Aug')) +
+  #scale_y_continuous(expand = expansion(mult = c(0.05, 0))) +
+  facet_wrap(~site, scales = "free_y", ncol = 1) +
+  ylab("No. spider mites/leaf\n") +
+  xlab("\nDate") +
+  guides(fill=guide_legend(nrow = 1)) +
+  theme_classic() +
+  annotate("segment", x=-Inf, xend=Inf, y=-Inf, yend=-Inf, size = 0.75) +
+  annotate("segment", x=-Inf, xend=-Inf, y=-Inf, yend=Inf, size = 0.75) +
+  theme(
+        strip.text = element_text(vjust = -1, size = 8),
+        plot.title = element_text(size = 11, face = "bold"),
+        strip.background = element_blank(),
+        #panel.border = element_rect(fill = NA, colour = "black", size = 0.75),
+        #axis.line = element_line(colour = 'black', size = 0),
+        #axis.title.x = element_blank(),
+        axis.ticks = element_line(colour = "black"),
+        axis.text.x = element_text(color = 'black'),
+        axis.text.y = element_text(color = 'black'),
+                #transparent background
+                panel.grid.major = element_blank(), 
+                panel.grid.minor = element_blank(),
+                panel.background = element_rect(fill = "transparent",colour = NA),
+                plot.background = element_rect(fill = "transparent",colour = NA),
+                legend.position=c(1,1), legend.justification=c(1,0),legend.box="vertical", legend.margin=margin(), legend.title = element_blank(), legend.key.size = unit(0.75, 'lines')
+        )
+output <- ggarrange(
+    output,
+    ncol = 1,
+    align="hv", common.legend = TRUE)
+  
+ggsave(plot = output, file = "Figure_2.tiff", width = 6, height = 11, units = "cm", dpi = 400)
+
+
+```
+
+
+
+PR-1 relative expression (Figure 4)
+```{r}
+
+library(readxl)
+library(ggplot2)
+Data <- read_excel("Fig 4.xlsx")
+Data$Weeks <- as.character(Data$Weeks)
+Data$Experimentlabel <- factor(Data$Experiment, labels=c(
+               "A"=expression(paste("27 April field spray")),
+               "B"=expression(paste("23 May field spray")),
+               "C"=expression(paste("Potted tree spray "))))
+
+ggplot(data = Data, aes(x = Weeks, y = minusddCT)) +
+  #geom_errorbar(aes(ymin = Foldchange-SEM, ymax = Foldchange+SEM, group = Elicitor), width = 0, position=position_dodge(width=0.9)) +
+  #geom_point(stat = "identity", shape = 21, color = 'black', aes(fill = Elicitor), position=position_dodge(width=0.5)) +
+  geom_hline(yintercept = 0, linetype = 'dashed', size = 0.25) +
+  geom_point(shape = 21, size = 2, aes(group = Elicitor), position=position_dodge(width=0.6)) +
+  geom_errorbar(stat = "summary", fun.data = mean_se, aes(group = Elicitor), position=position_dodge(width=0.6), width=0) +
+  geom_point(shape = 23, size = 2, stat = "summary", fun = "mean", color = 'black', aes(fill = Elicitor), position=position_dodge(width=0.6)) +
+  facet_wrap(~Experimentlabel, ncol = 1, scales = 'free',labeller = label_parsed) +
+  scale_fill_manual(values=c('black', 'grey')) +
+  geom_blank(data = subset(Data, Experiment  == "A"), aes(y = 3)) +
+  geom_blank(data = subset(Data, Experiment  == "B"), aes(y = 4, x = '1')) +
+  geom_blank(data = subset(Data, Experiment  == "C"), aes(x = '7')) +
+  scale_y_continuous(expression(paste("Relative ",italic("PR-1 "), "expression (-",paste(Delta),paste(Delta),"C"[T],")"))) +
+  scale_x_discrete("\nWeeks post-treatment",breaks = c("0 (pre-spray)","1","3","7")) +
+  theme_classic() +
+  annotate("segment", x=-Inf, xend=Inf, y=-Inf, yend=-Inf, size = 0.75) +
+  annotate("segment", x=-Inf, xend=-Inf, y=-Inf, yend=Inf, size = 0.75) +
+  guides(fill=guide_legend(ncol=1)) +
+  theme(
+        #strip.text = element_blank(),
+        #strip.background = element_blank(),
+        strip.text = element_text(face = "bold"),
+        #panel.border = element_rect(colour = "black", fill = NA),
+        axis.line = element_line(colour = 'black', size = 0.5),
+        axis.ticks = element_line(colour = "black"),
+        axis.text.x = element_text(color = 'black'),
+        axis.text.y = element_text(color = 'black'),
+        strip.background = element_blank(),
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        panel.background = element_rect(fill = "transparent",colour = NA),
+        plot.background = element_rect(fill = "transparent",colour = NA),
+        legend.position=c(1,1), legend.justification=c(1,0),legend.box="vertical", legend.margin=margin(), legend.title = element_blank(), legend.key.size = unit(0.75, 'lines')
+        #panel.spacing = unit(1.5, "lines")
+        )
+
+ggsave("Figure_4.tiff", width = 8, height = 12, units = "cm", dpi = 400, bg = "transparent")
+
+  
+
+```
+
+
+Statistical Analysis for PR-1 data (Fig 4)
+```{r}
+#LOAD PACKAGES
+library(readxl)
+library(car) #for Anova
+library(glmmTMB) #for generalized linear models
+library(DHARMa) #for model diagnostics
+library(dplyr) #for filter()
+library(emmeans) #for tukey tests
+
+
+#LOAD DATA
+Data <- read_excel("Fig 4.xlsx")
+
+#convert week to categorical variable
+Data$Weeks <- as.factor(Data$Weeks)
+
+#BUILD MODELS
+for (test in unique(Data$Experiment)) {
+  Data_test <- subset(Data, Experiment == test)
+  for(pde in unique(Data_test$Elicitor)){
+  Data_test_by_elicitor <- subset(Data_test, Elicitor == pde)
+  model <- glmmTMB(formula = minusddCT ~ Weeks + (1|Block), data = Data_test_by_elicitor)
+  plot(simulateResiduals(model))
+  print(test)
+  print(pde)
+  print(Anova(model))
+  }
+}
+
+print(emmeans(model, trt.vs.ctrl ~ source ~ Weeks,adjust = "mvt"))
+
+
+```
+
+
+Statistical Analysis for 2017 Experiment (Table 3)
+```{r}
+#LOAD PACKAGES
+library(readxl)
+library(car) #for Anova
+library(glmmTMB) #for generalized linear models
+library(DHARMa) #for model diagnostics
+library(dplyr) #for filter()
+library(emmeans) #for tukey tests
+
+
+#LOAD DATA
+Data <- read_excel("1728 analysis - leaf brush.xlsx")
+
+#convert week to categorical variable
+Data$week <- as.factor(Data$week)
+
+#BUILD MODELS
+eggsmodel   <- glmmTMB(formula = eggs    ~ trt + week + trt:week + site + trt:site + (1|site:block) + (1|subject), family = "nbinom1", data = Data)
+nymphsmodel <- glmmTMB(formula = old+yng ~ trt + week + trt:week + site + trt:site + (1|site:block) + (1|subject), family = "nbinom1", data = Data)
+tsmmodel    <- glmmTMB(formula = tsm     ~ trt + week + trt:week + site + trt:site + (1|site:block) + (1|subject), family = "nbinom2",
+                       data = subset(Data, site != 'A' & site != 'B')) #exclude blocks A and B due to low tsm counts
+
+#MODEL DIAGNOSTICS
+plot(simulateResiduals(eggsmodel))
+plot(simulateResiduals(nymphsmodel))
+plot(simulateResiduals(tsmmodel))
+
+#ANOVAs
+Anova(eggsmodel)
+Anova(nymphsmodel)
+Anova(tsmmodel)
+
+```
+
+
+
+Figures for 2018 Experiment Data (Fig. 3)
+```{r}
+
+####Note: There are samples for June 12 and 13. June 12 (and all previous samples) used dishwashing liquid on the plates. June 13 and following did not use dishwashing liquid because it made it difficult to tell whether nymphs were alive. Because of the closeness in time of the June 12 and 13 samples, only the June 13 data were used to represent that week.
+
+
+####LOAD DATA####
+library(readxl)
+library(ggplot2)
+Data <- read_excel("1828 - Analysis - Leaf brush.xlsx")
+Data <- subset(Data, day != 163) # exclude the June 12 sample explained above
+
+#reorder trt labels
+Data$trt <- factor(Data$trt, levels=c("Control", "Actigard", "Employ"), labels=c("Control", "ASM", "Harpin"))
+Data$Timing <- factor(Data$Timing, levels=c("1", "2"), labels=c("i) 27 April", "ii) 23 May"))
+
+
+
+eggs <- ggplot(data = Data, aes(x = day, y = ((eggs/lvs)), shape = trt, linetype = trt, color = trt, fill = trt)) +
+  stat_summary(fun.data = mean_se, geom="errorbar", width=0,  size=0.4, position=position_dodge(5), linetype = 'solid') +
+  stat_summary(fun.y = mean, geom = "line", position=position_dodge(5)) +
+  stat_summary(fun.y = mean, geom = "point", position=position_dodge(5)) +
+  scale_color_manual(values=c('black', 'black', 'grey')) +
+  scale_shape_manual(values=c(21, 23, 23)) +
+  scale_linetype_manual(values = c('dotted', 'solid', 'solid')) +
+  scale_fill_manual(values=c('white', 'black', 'grey')) +
+  scale_x_continuous(limits = c(110,200), breaks = c(117, 155, 193), labels = c('17\nApr', '4\nJun', ' 12\nJul')) +
+  scale_y_continuous(breaks = c(0, 0.1, 0.2, 0.3)) +
+  facet_wrap(~Timing, ncol = 1) +
+  ylab("No. eggs/leaf") +
+  xlab("\nDate") +
+  #ggtitle("A") +
+  theme_classic() +
+  annotate("segment", x=-Inf, xend=Inf, y=-Inf, yend=-Inf, size = 0.75) +
+  annotate("segment", x=-Inf, xend=-Inf, y=-Inf, yend=Inf, size = 0.75) +
+  theme(
+        strip.text = element_blank(),
+        plot.title = element_text(size = 11, face = "bold"),
+        strip.background = element_blank(),
+        #panel.border = element_rect(fill = NA, colour = "black", size = 0.75),
+        axis.line = element_line(colour = 'black', size = 0),
+        axis.title.x = element_blank(),
+        axis.ticks = element_line(colour = "black"),
+        axis.text.x = element_text(color = 'black'),
+        axis.text.y = element_text(color = 'black'),
+        #plot.margin = (unit(c(1,2,1,1),"mm")),
+                #transparent background
+                panel.grid.major = element_blank(), 
+                panel.grid.minor = element_blank(),
+                panel.background = element_rect(fill = "transparent",colour = NA),
+                plot.background = element_rect(fill = "transparent",colour = NA),
+                legend.position=c(1,1), legend.justification=c(1,0),legend.box="vertical", legend.margin=margin(), legend.title = element_blank(), legend.key.size = unit(0.75, 'lines')
+        )
+  
+
+nymphs <- ggplot(data = Data, aes(x = day, y = (((yng+old)/lvs)), shape = trt, linetype = trt, color = trt, fill = trt)) +
+  stat_summary(fun.data = mean_se, geom="errorbar", width=0,  size=0.4, position=position_dodge(5), linetype = 'solid') +
+  stat_summary(fun.y = mean, geom = "line", position=position_dodge(5)) +
+  stat_summary(fun.y = mean, geom = "point", position=position_dodge(5)) +
+  scale_color_manual(values=c('black', 'black', 'grey')) +
+  scale_shape_manual(values=c(21, 23, 23)) +
+  scale_linetype_manual(values = c('dotted', 'solid', 'solid')) +
+  scale_fill_manual(values=c('white', 'black', 'grey')) +
+  scale_x_continuous(limits = c(110,200), breaks = c(117, 155, 193), labels = c('17\nApr', '4\nJun', ' 12\nJul')) +
+  scale_y_continuous(breaks = c(0, 0.1, 0.2, 0.3)) +
+  facet_wrap(~Timing, ncol = 1) +
+  ylab("No. nymphs/leaf") +
+  xlab("\nDate") +
+  #ggtitle("B") +
+  theme_classic() +
+  annotate("segment", x=-Inf, xend=Inf, y=-Inf, yend=-Inf, size = 0.75) +
+  annotate("segment", x=-Inf, xend=-Inf, y=-Inf, yend=Inf, size = 0.75) +
+  theme(
+        strip.text = element_blank(),
+        plot.title = element_text(size = 11, face = "bold"),
+        strip.background = element_blank(),
+        #panel.border = element_rect(fill = NA, colour = "black", size = 0.75),
+        axis.line = element_line(colour = 'black', size = 0),
+        #axis.title.x = element_blank(),
+        axis.ticks = element_line(colour = "black"),
+        axis.text.x = element_text(color = 'black'),
+        axis.text.y = element_text(color = 'black'),
+        #plot.margin = (unit(c(1,2,1,1),"mm")),
+                #transparent background
+                panel.grid.major = element_blank(), 
+                panel.grid.minor = element_blank(),
+                panel.background = element_rect(fill = "transparent",colour = NA),
+                plot.background = element_rect(fill = "transparent",colour = NA),
+                legend.position=c(1,1), legend.justification=c(1,0),legend.box="vertical", legend.margin=margin(), legend.title = element_blank(), legend.key.size = unit(0.75, 'lines')
+        )
+  
+
+#Adult taps
+Data <- read_excel("1828 - Analysis - Taps.xlsx")
+
+#reorder trt labels
+Data$trt <- factor(Data$trt, levels=c("Control", "Actigard", "Employ"), labels=c("Control", "ASM", "Harpin"))
+
+#First, need to average taps within reps together
+
+summary1 <- do.call(data.frame, 
+                        aggregate(adults~Timing+day+trt+block, 
+                                  data = Data, 
+                                  function(x) 
+                                    c(mean = mean(x),
+                                      sum = sum(x),
+                                      sd = sd(x), 
+                                      count = length(x))))
+
+summary1$Timing <- factor(summary1$Timing, levels=c("1", "2"), labels=c("i) 27 April", "ii) 23 May"))
+
+adults <- ggplot(data = summary1, aes(x = day, y = adults.mean, shape = trt, linetype = trt, color = trt, fill = trt)) +
+  stat_summary(fun.data = mean_se, geom="errorbar", width=0,  size=0.4, position=position_dodge(5), linetype = 'solid') +
+  stat_summary(fun.y = mean, geom = "line", position=position_dodge(5)) +
+  stat_summary(fun.y = mean, geom = "point", position=position_dodge(5)) +
+  scale_color_manual(values=c('black', 'black', 'grey')) +
+  scale_shape_manual(values=c(21, 23, 23)) +
+  scale_linetype_manual(values = c('dotted', 'solid', 'solid')) +
+  scale_fill_manual(values=c('white', 'black', 'grey')) +
+  scale_x_continuous(limits = c(110,200), breaks = c(117, 155, 193), labels = c('17\nApr', '4\nJun', ' 12\nJul')) +
+  #scale_y_continuous(breaks = c(0, 0.1, 0.2, 0.3)) +
+  facet_wrap(~Timing, ncol = 1) +
+  ylab("No. adults/tap") +
+  xlab("\nDate") +
+  #ggtitle("C") +
+  theme_classic() +
+  annotate("segment", x=-Inf, xend=Inf, y=-Inf, yend=-Inf, size = 0.75) +
+  annotate("segment", x=-Inf, xend=-Inf, y=-Inf, yend=Inf, size = 0.75) +
+  theme(
+        strip.text = element_blank(),
+        plot.title = element_text(size = 11, face = "bold"),
+        strip.background = element_blank(),
+        #panel.border = element_rect(fill = NA, colour = "black", size = 0.75),
+        axis.line = element_line(colour = 'black', size = 0),
+        axis.title.x = element_blank(),
+        axis.ticks = element_line(colour = "black"),
+        axis.text.x = element_text(color = 'black'),
+        axis.text.y = element_text(color = 'black'),
+        #plot.margin = (unit(c(1,1,1,2),"mm")),
+                #transparent background
+                panel.grid.major = element_blank(), 
+                panel.grid.minor = element_blank(),
+                panel.background = element_rect(fill = "transparent",colour = NA),
+                plot.background = element_rect(fill = "transparent",colour = NA),
+                legend.position=c(1,1), legend.justification=c(1,0),legend.box="vertical", legend.margin=margin(), legend.title = element_blank(), legend.key.size = unit(0.75, 'lines')
+        )
+  
+
+
+output <- ggarrange(
+    eggs,
+    nymphs,
+    adults,
+    ncol = 3,
+    align="hv", common.legend = TRUE)
+  
+ggsave(plot = output, file = "Figure_3.tiff", width = 16, height = 6, units = "cm", dpi = 400)
+
+
+
+
+```
+
+Statistical models for 2018 experiment
+```{r}
+
+#Note: There are samples for June 12 and 13. June 12 (and all previous samples) used dishwashing liquid on the plates. June 13 and following did no use dishwashing liquid because it made it difficult to tell whether nymphs were alive. Because of the closeness in time of the June 12 and 13 samples, only the June 13 data were used.
+
+#LOAD PACKAGES
+library(readxl)
+library(ggplot2)
+library(glmmTMB)
+library(DHARMa)
+library(car)
+library(emmeans)
+
+#LOAD DATA
+#Nymph data
+Data <- read_excel("1828 - Analysis - Leaf brush.xlsx")
+Data <- subset(Data, day != 163) # exclude the June 12 sample explained above
+Data$week <- as.factor(Data$week)
+Data$Timing <- as.factor(Data$Timing)
+Dataspray1 <- subset(Data, Timing == 1)
+Dataspray2 <- subset(Data, Timing == 2)
+#Adult tap data
+Data_taps <- read_excel("1828 - Analysis - Taps.xlsx")
+Data_taps$week <- as.factor(Data_taps$week)
+Data_taps$Timing <- as.factor(Data_taps$Timing)
+Data_taps <- do.call(data.frame, 
+                          aggregate(adults~Timing+day+week+trt+block+subject, 
+                                    data = Data_taps, 
+                                    function(x) 
+                                    c(sum = sum(x), 
+                                      count = length(x))))
+Dataspray1_taps <- subset(Data_taps, Timing == 1)
+Dataspray2_taps <- subset(Data_taps, Timing == 2)
+
+#BUILD MODELS
+eggsmodel_spray1   <- glmmTMB(formula = log((eggs/lvs)+0.01)  ~ trt + week + trt:week + (1|block) + (1|subject), family = "gaussian", data = Dataspray1)
+eggsmodel_spray2   <- glmmTMB(formula = log((eggs/lvs)+0.01)  ~ trt + week + trt:week + (1|block) + (1|subject), family = "gaussian", data = Dataspray2)
+nymphsmodel_spray1 <- glmmTMB(formula = log((nymphs/lvs)+0.01)  ~ trt + week + trt:week + (1|block) + (1|subject), family = "gaussian", data = Dataspray1)
+nymphsmodel_spray2 <- glmmTMB(formula = log((nymphs/lvs)+0.01)  ~ trt + week + trt:week + (1|block) + (1|subject), family = "gaussian", data = Dataspray2)
+adultmodel_spray1  <- glmmTMB(formula = log(adults.sum+1)  ~ trt + week + trt:week + (1|block) + (1|subject), family = "gaussian", data = Dataspray1_taps)
+adultmodel_spray2  <- glmmTMB(formula = log(adults.sum+1)  ~ trt + week + trt:week + (1|block) + (1|subject), family = "gaussian", data = Dataspray2_taps)
+
+#MODEL DIAGNOSTICS
+plot(simulateResiduals(eggsmodel_spray1))
+plot(simulateResiduals(eggsmodel_spray2))
+plot(simulateResiduals(nymphsmodel_spray1))
+plot(simulateResiduals(nymphsmodel_spray2))
+plot(simulateResiduals(adultmodel_spray1))
+plot(simulateResiduals(adultmodel_spray2))
+
+#STATISTICAL TESTS
+Anova(eggsmodel_spray1)
+Anova(eggsmodel_spray2)
+Anova(nymphsmodel_spray1)
+Anova(nymphsmodel_spray2)
+Anova(adultmodel_spray1)
+Anova(adultmodel_spray2)
+
+#POST-HOC TESTS FOR NYMPHS
+#____
+#conduct a Tukey test to compare treatment means within each sample date
+#purpose of this is to diagnose the significant Week X Trt interactions for nymphs for both spray timing experiments
+#note: poorly fitting models occur only for days with very low counts across treatments and are ignored as those data have too low counts for any practical interpretation anyway.
+#____
+#tests for spray experiment 1
+dates <- unique(Dataspray1$day)
+for (value in dates){
+  analysisdata <- subset(Dataspray1, day == value)
+  nymphsmodel1   <- glmmTMB(formula = log(nymphs/lvs+0.01)  ~ trt + (1|block), family = "gaussian", data = analysisdata)
+print(paste("Day",value,"readout begins:"))
+plot(simulateResiduals(nymphsmodel1))
+print(emmeans(nymphsmodel1, list(pairwise ~ trt), adjust = "tukey"))
+}
+#tests for spray experiment 2
+dates <- unique(Dataspray2$day)
+for (value in dates){
+  analysisdata <- subset(Dataspray2, day == value)
+  nymphsmodel1   <- glmmTMB(formula = log(nymphs/lvs+0.01)  ~ trt + (1|block), family = "gaussian", data = analysisdata)
+print(paste("Day",value,"readout begins:"))
+plot(simulateResiduals(nymphsmodel1))
+print(emmeans(nymphsmodel1, list(pairwise ~ trt), adjust = "tukey"))
+}
+
+```
+
